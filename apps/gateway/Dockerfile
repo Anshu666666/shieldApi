@@ -2,10 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY apps/gateway/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app/
+COPY apps/gateway/app/ ./app/
+COPY packages/ ./packages/
+
+ENV PYTHONPATH=/app
 
 EXPOSE 8000
 

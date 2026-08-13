@@ -2,11 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json ./
+COPY apps/dashboard/package.json ./
 RUN npm install
 
-COPY src/ ./src/
-COPY index.html ./ 2>/dev/null || true
+COPY apps/dashboard/src/ ./src/
+COPY apps/dashboard/index.html ./ 2>/dev/null || true
 
 RUN npm run build || mkdir -p dist
 

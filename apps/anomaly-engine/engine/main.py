@@ -1,15 +1,11 @@
 import time
 import re
-import redis
 import os
 from collections import defaultdict
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# Setup Redis Connection (using Docker environment variables)
-redis_host = os.getenv("REDIS_HOST", "localhost")
-redis_port = int(os.getenv("REDIS_PORT", 6379))
-r = redis.Redis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+from packages.shared.redis_manager import RedisManager
 
 # State for Filter 3 (Sliding Window)
 TIME_WINDOW_SEC = 10
@@ -67,10 +63,11 @@ class LogPipelineHandler(FileSystemEventHandler):
 
     def filter4_block(self, ip):
         # FILTER 4: The Blocker (Push to Redis)
-        is_already_blocked = r.sismember("blocked_ips", ip)
+        is_already_blocked = RedisManager.is_ip_blocked(ip)
         if not is_already_blocked:
-            r.sadd("blocked_ips", ip)
-            print(f"🚨 THREAT DETECTED: IP {ip} exceeded 50 errors in 10s. Blocked in Redis!")
+            # Block for 24 hours (86400 seconds)
+            RedisManager.block_ip(ip, ttl_seconds=86400)
+            print(f"🚨 THREAT DETECTED: IP {ip} exceeded 50 errors in 10s. Blocked in Redis with 24h TTL!")
 
 if __name__ == "__main__":
     # Fetch log path from Docker environment

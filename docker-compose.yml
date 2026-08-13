@@ -18,8 +18,8 @@ services:
   # Core API Gateway / Proxy
   gateway:
     build:
-      context: ./apps/gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/gateway/Dockerfile
     container_name: shieldapi-gateway
     ports:
       - "8000:8000"
@@ -38,8 +38,8 @@ services:
   # Anomaly Guardian (Background Log Analysis Engine)
   anomaly-engine:
     build:
-      context: ./apps/anomaly-engine
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/anomaly-engine/Dockerfile
     container_name: shieldapi-anomaly-engine
     environment:
       - REDIS_HOST=redis
@@ -56,8 +56,8 @@ services:
   # Protected Backend Microservice (Dummy Target)
   backend-service:
     build:
-      context: ./apps/backend-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/backend-service/Dockerfile
     container_name: shieldapi-backend-service
     ports:
       - "8001:8001"
@@ -65,8 +65,8 @@ services:
   # Admin Dashboard UI
   dashboard:
     build:
-      context: ./apps/dashboard
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/dashboard/Dockerfile
     container_name: shieldapi-dashboard
     ports:
       - "3000:3000"
