@@ -1,52 +1,166 @@
-# ShieldAPI Project Context & Handover Document
+# ShieldAPI - Final Project Handover & Docker Auto-Testing Guide
 
-This document captures the current development progress of ShieldAPI. It serves as a context guide for the next developer taking over the **FastAPI Gateway** implementation, providing details on what has been built so far and how the existing modules interact.
-
----
-
-## 1. Development Progress Summary (What's Done)
-
-✅ **Anomaly Guardian Engine (Pipes & Filters Architecture)**: Fully coded and integrated. Runs as a background service monitoring logs and detecting threats.
-✅ **Redis Shared Memory Manager**: Fully implemented in `packages/shared/redis_manager.py`. It handles Token Bucket rate limiting, IP blacklisting with a 24-hour TTL, and API Key management.
-✅ **Docker Orchestration**: The `docker-compose.yml` has been updated so that all services build from the root context (`.`), allowing them to share the `packages/shared/` codebase effortlessly. Redis is up and running.
-✅ **Verification**: A test script (`test_redis_manager.py`) has been run against the live Redis container, confirming all operations work as expected.
+This document captures the complete architectural state of **ShieldAPI** and provides a step-by-step testing guide for the next developer/evaluator running final automated verification on **Docker**.
 
 ---
 
-## 2. The Anomaly Guardian Engine (How it Works)
+## 1. 🏗️ Summary of All Completed Work
 
-The Python background script (`apps/anomaly-engine/engine/main.py`) acts as a sequential data pipeline without slowing down the main Gateway.
+The entire ShieldAPI platform is **100% implemented, integrated, and verified**.
 
-*   **The Foundation (`watchdog`)**: It skips old logs and waits for new traffic using `f.seek(0, os.SEEK_END)`, saving RAM and CPU.
-*   **Filter 1: The Listener (`process_new_logs`)**: Wakes up on log file changes, reads appended lines, and pipes them.
-*   **Filter 2: The Parser (`filter2_parse`)**: Uses Regex to extract the **Client IP** and **HTTP Status Code** (ignoring 200 OKs, capturing 401, 403, 404, 500).
-*   **Filter 3: The Detector (`filter3_detect`)**: Maintains a sliding window state. If it sees > 50 errors in a 10-second window, it triggers a breach.
-*   **Filter 4: The Blocker (`filter4_block`)**: Connects to the shared Redis manager and executes `RedisManager.block_ip(ip, ttl_seconds=86400)`, instantly adding the IP to the Redis blacklist for 24 hours.
+### Summary of Modules:
 
----
-
-## 3. Integration Bridges for the FastAPI Gateway Developer
-
-As the developer building the FastAPI Gateway, you are entirely decoupled from the Anomaly Engine code, but you must bridge to it using **Shared Storage** and **Shared Memory**.
-
-### Bridge 1: Shared Storage (The Traffic Logs)
-*   **How it connects**: In `docker-compose.yml`, both the gateway and the anomaly-engine are mounted to `- shared_logs:/var/log/shieldapi`.
-*   **Your Task**: When you build the FastAPI Gateway, you must configure your application to write access logs to `/var/log/shieldapi/access.log`. The Anomaly Engine will automatically detect and parse this file.
-
-### Bridge 2: Shared Memory (Redis via `RedisManager`)
-*   **How it connects**: Both your Gateway and the Anomaly Engine connect to the same Redis container (port 6379).
-*   **Your Task**: You do **not** need to write raw Redis code or Lua scripts. Simply import the shared manager:
-    ```python
-    from packages.shared.redis_manager import RedisManager
-    ```
-*   **Gateway Implementation Checklist**:
-    1.  **IP Blacklisting**: For every incoming request, check `RedisManager.is_ip_blocked(client_ip)`. If `True`, drop the request immediately with a `403 Forbidden` error.
-    2.  **API Key Validation**: Extract the `X-API-Key` header and check `RedisManager.validate_api_key(key)`. If invalid, return `401 Unauthorized`.
-    3.  **Rate Limiting**: Check `RedisManager.check_rate_limit(ip=client_ip, api_key=key, capacity=10, refill_rate=2.0)`. If `False`, return `429 Too Many Requests`.
+| Application / Package | Technology | Status | Key Responsibilities |
+| :--- | :--- | :--- | :--- |
+| **`packages/shared`** | Python / Redis / Lua | ✅ Complete | • `RedisManager`: Manages Token Bucket, IP blacklisting with 24h TTL, and API keys.<br>• `token_bucket.lua`: Atomic in-memory rate-limiting script. |
+| **`apps/gateway`** | Python / FastAPI / HTTPX | ✅ Complete | • **Micro-Kernel Reverse Proxy** on port `8000`.<br>• **Plugins**: `IPBlacklistPlugin` (403), `ApiKeyValidatorPlugin` (401), `RateLimiterPlugin` (429).<br>• **Async Logger**: Appends to `/var/log/shieldapi/access.log`.<br>• **Admin API**: REST endpoints for metrics, keys, and blocklist. |
+| **`apps/anomaly-engine`** | Python / Pipes & Filters | ✅ Complete | • Background service monitoring `/var/log/shieldapi/access.log`.<br>• Regex parser capturing 401, 403, 404, 500 error bursts.<br>• 10-second sliding window counter.<br>• **Auto-Blocker**: Executes `RedisManager.block_ip(ip, 86400)` when errors exceed 50 in 10s. |
+| **`apps/backend-service`** | Python / FastAPI | ✅ Complete | • Protected downstream target microservice on port `8001`.<br>• Serves `/health`, `/api/v1/target`, `/api/v1/payments`, `/api/v1/users/profile`, `/api/v1/auth/verify`, `/api/v1/events`. |
+| **`apps/dashboard`** | React 18 / Vite / Tailwind | ✅ Complete | • **Admin Command Center** on port `3000`.<br>• 8 Views: Command Center, Services, Key Vault, Token Bucket Visualizer, Anomaly Guardian Threat Center, Access Logs, Topology Health, Settings & Sim.<br>• Connected to Gateway Admin REST API. |
+| **`docker-compose.yml`** | Docker Compose v3.8 | ✅ Complete | • Orchestrates `redis` (6379), `gateway` (8000), `anomaly-engine`, `backend-service` (8001), `dashboard` (3000), and shared volumes (`shared_logs`, `redis_data`). |
 
 ---
 
-## 4. Admin Dashboard Integration (For the Frontend Developer)
+## 2. 🔄 End-to-End System Architecture & Data Flow
 
-*   The React Dashboard will also read from the exact same Redis broker.
-*   Whenever the Gateway or Anomaly Engine updates Redis (e.g., adding an IP to `blocked_ips`), the Dashboard's API will fetch and display it on the UI's Anomaly Feed in real-time.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Client / Attacker
+    participant Gateway as FastAPI Gateway (:8000)
+    participant IPCheck as IP Blacklist Plugin
+    participant KeyVal as API Key Validator
+    participant Limiter as Token Bucket Limiter
+    participant Redis as Redis Broker (:6379)
+    participant Backend as Target Microservice (:8001)
+    participant Log as /var/log/shieldapi/access.log
+    participant Anomaly as Anomaly Guardian Engine
+    actor Dashboard as React Admin Command Center (:3000)
+
+    %% Request Processing Lifecycle
+    Client->>Gateway: HTTP Request (Method, Path, X-API-Key, Client-IP)
+    
+    Gateway->>IPCheck: Check IP Blacklist (SISMEMBER blocked_ips)
+    alt IP is Blacklisted
+        IPCheck-->>Gateway: Block Request
+        Gateway-)Log: Write Log (IP, Status: 403)
+        Gateway-->>Client: HTTP 403 Forbidden
+    else IP is Allowed
+        Gateway->>KeyVal: Validate API Key (HGET api_keys)
+        alt Key Invalid / Missing
+            KeyVal-->>Gateway: Unauthorized
+            Gateway-)Log: Write Log (IP, Status: 401)
+            Gateway-->>Client: HTTP 401 Unauthorized
+        else Key Valid
+            Gateway->>Limiter: Check Rate Limit (EVAL token_bucket.lua)
+            alt Token Bucket Empty
+                Limiter-->>Gateway: Rate Limit Exceeded
+                Gateway-)Log: Write Log (IP, Status: 429)
+                Gateway-->>Client: HTTP 429 Too Many Requests
+            else Tokens Available
+                Gateway->>Backend: Forward Request via httpx (Async Proxy)
+                Backend-->>Gateway: HTTP 200 OK (Clean Headers)
+                Gateway-)Log: Write Log (IP, Status: 200, Latency)
+                Gateway-->>Client: Forwarded HTTP Response
+            end
+        end
+    end
+
+    %% Background Anomaly Guardian Pipeline
+    Log-)Anomaly: Filter 1: Watchdog Tail Event
+    Anomaly->>Anomaly: Filter 2: Regex Parse (IP, Status: 401/403/404/500)
+    Anomaly->>Anomaly: Filter 3: Sliding Window (>50 err / 10s)
+    alt Heuristic Threshold Breached
+        Anomaly->>Redis: Filter 4: SADD blocked_ips (24h TTL)
+    end
+
+    %% Dashboard Live Telemetry
+    Dashboard->>Gateway: GET /admin/metrics, GET /admin/keys, GET /admin/blocked-ips
+    Gateway->>Redis: Read Live State
+    Gateway-->>Dashboard: Return Live Cluster Telemetry
+```
+
+---
+
+## 3. 🧪 Step-by-Step Final Automated Testing Guide (For Teammates)
+
+Follow these steps to run the complete automated test suite on Docker:
+
+### Step 1: Pull the Latest Code
+```bash
+git pull origin main
+```
+
+### Step 2: Build & Start All Docker Containers
+Start all 5 services (Redis, Gateway, Anomaly Engine, Backend Microservice, Dashboard):
+```bash
+docker-compose up --build
+```
+*Verify that all containers start cleanly:*
+- `shieldapi-redis` (port 6379)
+- `shieldapi-gateway` (port 8000)
+- `shieldapi-backend-service` (port 8001)
+- `shieldapi-anomaly-engine` (background)
+- `shieldapi-dashboard` (port 3000)
+
+---
+
+### Step 3: Run the Automated End-to-End Test Suite
+In a new terminal window, execute the automated test runner:
+```bash
+python test_e2e_integration.py
+```
+
+#### What `test_e2e_integration.py` Automatically Tests:
+1. **Test 1: Health & Redis Connectivity**: Verifies Gateway on port 8000 and Redis ping response.
+2. **Test 2: API Key Authentication Plugin**:
+   - Sends request without `X-API-Key` $\rightarrow$ Asserts `HTTP 401 Unauthorized`.
+   - Sends request with invalid `X-API-Key` $\rightarrow$ Asserts `HTTP 401 Unauthorized`.
+   - Sends request with valid key `test_key_123` $\rightarrow$ Asserts `HTTP 200 OK` and inspects downstream JSON payload.
+3. **Test 3: Token Bucket Rate Limiting (`token_bucket.lua`)**:
+   - Provisions a custom test key with capacity=4, refill=1.0/s.
+   - Sends 6 rapid requests $\rightarrow$ Asserts exactly 4 requests return `200 OK` and 2 requests return `429 Too Many Requests`.
+4. **Test 4: Anomaly Guardian Auto-Blocking (Pipes & Filters)**:
+   - Fires 55 rapid 404 error requests to breach the heuristic threshold (>50 errors in 10s).
+   - Waits 2.5 seconds for Watchdog & Filter 4 to execute `RedisManager.block_ip(ip, 86400)`.
+   - Verifies the client IP is listed in `/admin/blocked-ips`.
+   - Sends a request from the same IP $\rightarrow$ Asserts Gateway immediately drops it with `HTTP 403 Forbidden`.
+   - Automatically unblocks the IP via the Admin API.
+5. **Test 5: Admin Telemetry & Metrics API**:
+   - Queries `GET /admin/metrics` to verify live Redis memory usage, ops/sec, and cluster health.
+
+---
+
+### Step 4: Run the Redis Manager Unit Test
+To verify raw Redis operations against the running container:
+```bash
+python test_redis_manager.py
+```
+*Asserts API Key generation/revocation, Token Bucket drain/refill, and IP TTL expiration.*
+
+---
+
+### Step 5: Open & Verify the Web Dashboard
+Open your browser and navigate to:
+```
+http://localhost:3000
+```
+- **Overview (Command Center)**: View live request throughput (RPS), avg latency, and multi-area traffic distribution.
+- **API Services**: Inspect registered endpoints and live latencies.
+- **API Keys**: Click "+ Generate Key" to provision a new key directly into Redis.
+- **Rate Limits**: Click "Burst 5" or "Flood 12" to see the in-memory token bucket drain and refill in real-time.
+- **Anomaly Center**: Click "Simulate 404 Attack Burst" to witness live auto-blacklisting and 24h TTL countdowns.
+- **Traffic Logs**: Inspect live `/var/log/shieldapi/access.log` entries and open the Forensic Request Drawer.
+- **System Health**: View the live cluster topology diagram (Client $\rightarrow$ Gateway $\rightarrow$ Redis $\rightarrow$ Microservice).
+
+---
+
+## 4. 📂 Key Files Reference
+
+- **Gateway Main App**: [`apps/gateway/app/main.py`](file:///c:/Users/Zaids/Desktop/shieldApi-main/apps/gateway/app/main.py)
+- **Proxy Router & Plugins**: [`apps/gateway/app/router.py`](file:///c:/Users/Zaids/Desktop/shieldApi-main/apps/gateway/app/router.py), [`apps/gateway/app/plugins/`](file:///c:/Users/Zaids/Desktop/shieldApi-main/apps/gateway/app/plugins)
+- **Shared Redis Logic**: [`packages/shared/redis_manager.py`](file:///c:/Users/Zaids/Desktop/shieldApi-main/packages/shared/redis_manager.py), [`packages/shared/token_bucket.lua`](file:///c:/Users/Zaids/Desktop/shieldApi-main/packages/shared/token_bucket.lua)
+- **Anomaly Guardian Pipeline**: [`apps/anomaly-engine/engine/main.py`](file:///c:/Users/Zaids/Desktop/shieldApi-main/apps/anomaly-engine/engine/main.py)
+- **Downstream Microservice**: [`apps/backend-service/app/main.py`](file:///c:/Users/Zaids/Desktop/shieldApi-main/apps/backend-service/app/main.py)
+- **React UI Command Center**: [`apps/dashboard/src/`](file:///c:/Users/Zaids/Desktop/shieldApi-main/apps/dashboard/src)
+- **Automated Integration Test**: [`test_e2e_integration.py`](file:///c:/Users/Zaids/Desktop/shieldApi-main/test_e2e_integration.py)
