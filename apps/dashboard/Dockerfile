@@ -5,10 +5,9 @@ WORKDIR /app
 COPY apps/dashboard/package.json ./
 RUN npm install
 
-COPY apps/dashboard/src/ ./src/
-COPY apps/dashboard/index.html ./ 2>/dev/null || true
+COPY apps/dashboard/ ./
 
-RUN npm run build || mkdir -p dist
+RUN npm run build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
