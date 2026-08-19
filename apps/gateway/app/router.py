@@ -60,9 +60,24 @@ async def proxy_forward(request: Request, path: str):
     # -------------------------------------------------------------
     # 3. Micro-Kernel Plugin: Token Bucket Rate Limiter
     # -------------------------------------------------------------
+    key_capacity = None
+    key_refill = None
+    if key_meta and isinstance(key_meta, dict):
+        if "rateLimitCapacity" in key_meta:
+            key_capacity = int(key_meta["rateLimitCapacity"])
+        elif "rateLimitRpm" in key_meta:
+            key_capacity = max(10, int(key_meta["rateLimitRpm"]) // 60)
+            
+        if "rateLimitRefill" in key_meta:
+            key_refill = float(key_meta["rateLimitRefill"])
+        elif key_capacity:
+            key_refill = float(key_capacity) / 5.0
+
     is_rate_allowed, rate_err_res = RateLimiterPlugin.check_limit(
         client_ip=client_ip,
-        api_key=api_key
+        api_key=api_key,
+        capacity=key_capacity,
+        refill_rate=key_refill
     )
     if not is_rate_allowed and rate_err_res:
         latency_ms = (time.time() - start_time) * 1000
