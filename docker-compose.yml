@@ -69,7 +69,7 @@ services:
       dockerfile: ./apps/dashboard/Dockerfile
     container_name: shieldapi-dashboard
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - gateway
 
