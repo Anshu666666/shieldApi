@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   ApiService,
   ApiKeyRecord,
@@ -147,12 +147,14 @@ export const TelemetryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   // Token Bucket Simulator
-  const [tokenBucket, setTokenBucket] = useState<TokenBucketState>({
+  const initialTokenBucketState: TokenBucketState = {
     capacity: 10,
     tokens: 10,
     refillRate: 2.0,
     lastUpdated: Date.now()
-  });
+  };
+  const [tokenBucket, setTokenBucket] = useState<TokenBucketState>(initialTokenBucketState);
+  const tokenBucketRef = useRef<TokenBucketState>(initialTokenBucketState);
 
   // Simulator config
   const [simulator, setSimulator] = useState<SimulatorConfig>({
@@ -170,44 +172,59 @@ export const TelemetryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Token bucket refill interval
   useEffect(() => {
     const interval = setInterval(() => {
-      setTokenBucket(prev => {
-        const now = Date.now();
-        const deltaSec = (now - prev.lastUpdated) / 1000;
-        const newTokens = Math.min(prev.capacity, prev.tokens + deltaSec * prev.refillRate);
-        return {
-          ...prev,
-          tokens: Number(newTokens.toFixed(2)),
-          lastUpdated: now
-        };
-      });
+      const prev = tokenBucketRef.current;
+      const now = Date.now();
+      const deltaSec = (now - prev.lastUpdated) / 1000;
+      const newTokens = Math.min(prev.capacity, prev.tokens + deltaSec * prev.refillRate);
+      const updated = {
+        ...prev,
+        tokens: Number(newTokens.toFixed(2)),
+        lastUpdated: now
+      };
+      tokenBucketRef.current = updated;
+      setTokenBucket(updated);
     }, 100);
     return () => clearInterval(interval);
   }, []);
 
   const consumeToken = (count: number = 1) => {
-    let allowed = false;
-    let remaining = 0;
-    setTokenBucket(prev => {
-      if (prev.tokens >= count) {
-        allowed = true;
-        remaining = Number((prev.tokens - count).toFixed(2));
-        return { ...prev, tokens: remaining, lastUpdated: Date.now() };
-      } else {
-        allowed = false;
-        remaining = prev.tokens;
-        return prev;
-      }
-    });
-    return { allowed, remaining };
+    const prev = tokenBucketRef.current;
+    const now = Date.now();
+    const deltaSec = (now - prev.lastUpdated) / 1000;
+    const currentTokens = Math.min(prev.capacity, prev.tokens + deltaSec * prev.refillRate);
+
+    if (currentTokens >= count) {
+      const remaining = Number((currentTokens - count).toFixed(2));
+      const updated = {
+        ...prev,
+        tokens: remaining,
+        lastUpdated: now
+      };
+      tokenBucketRef.current = updated;
+      setTokenBucket(updated);
+      return { allowed: true, remaining };
+    } else {
+      const remaining = Number(currentTokens.toFixed(2));
+      const updated = {
+        ...prev,
+        tokens: remaining,
+        lastUpdated: now
+      };
+      tokenBucketRef.current = updated;
+      setTokenBucket(updated);
+      return { allowed: false, remaining };
+    }
   };
 
   const updateTokenBucketConfig = (capacity: number, refillRate: number) => {
-    setTokenBucket({
+    const updated = {
       capacity,
       tokens: capacity,
       refillRate,
       lastUpdated: Date.now()
-    });
+    };
+    tokenBucketRef.current = updated;
+    setTokenBucket(updated);
     addToast('info', 'Token Bucket Updated', `Capacity set to ${capacity}, refill rate: ${refillRate}/sec`);
   };
 
