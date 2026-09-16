@@ -1,8 +1,5 @@
-# ShieldAPI — System User Manual & Operational Guide
+# 🛡️ ShieldAPI — System User Manual & Operational Guide
 
-<div align="center">
-
-# 🛡️ ShieldAPI
 ### Distributed Microservice Security Gateway, Atomic Token-Bucket Rate Limiter & Heuristic Anomaly Guardian
 
 ---
@@ -16,8 +13,6 @@
 | **Syed Zaid Gafer** | **2024BCD0028** |
 | **Nipun Abhilash** | **2024BCD0024** |
 
-<br/>
-
 **Date of Submission:** September 2026  
 **Document Version:** 1.0.0 (Release)  
 **Live Application URL:** [https://shield-gateway.duckdns.org:3000](https://shield-gateway.duckdns.org:3000)  
@@ -25,8 +20,6 @@
 **GitHub Repository:** [https://github.com/Anshu666666/shieldApi](https://github.com/Anshu666666/shieldApi)
 
 ---
-
-</div>
 
 <div style="page-break-after: always;"></div>
 
@@ -573,12 +566,8 @@ volumes:
 
 ---
 
-<div align="center">
-
 ### End of User Manual
 
 **ShieldAPI Security Engineering Team**  
 *Aman Madheshiya (2024BCD0032) • Anshuman Biswas (2024BCD0008) • Syed Zaid Gafer (2024BCD0028) • Nipun Abhilash (2024BCD0024)*  
 *September 2026*
-
-</div>
