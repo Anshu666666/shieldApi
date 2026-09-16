@@ -256,16 +256,25 @@ styled_html = f"""<!DOCTYPE html>
     background-color: #f8fafc;
   }}
 
-  /* Code Blocks */
+  /* Suppress all scrollbars in print / PDF */
+  ::-webkit-scrollbar {{
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }}
+
+  /* Code Blocks - Print Safe */
   pre {{
     background-color: #0d1117;
     color: #e6edf3;
     padding: 12px 16px;
     border-radius: 6px;
     font-family: "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
-    font-size: 8.5pt;
+    font-size: 8pt;
     line-height: 1.45;
-    overflow-x: auto;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow: visible !important;
     page-break-inside: avoid;
     border: 1px solid #30363d;
   }}

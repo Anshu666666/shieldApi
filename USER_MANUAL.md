@@ -223,12 +223,12 @@ docker-compose ps
 ```
 **Expected Terminal Output:**
 ```text
-NAME                         IMAGE                       STATUS                  PORTS
-shieldapi-redis              redis:7-alpine              Up (healthy)            0.0.0.0:6379->6379/tcp
-shieldapi-gateway            shieldapi-gateway           Up 5 minutes            0.0.0.0:8000->8000/tcp
-shieldapi-anomaly-engine     shieldapi-anomaly-engine    Up 5 minutes            
-shieldapi-backend-service    shieldapi-backend-service   Up 5 minutes            0.0.0.0:8001->8001/tcp
-shieldapi-dashboard          shieldapi-dashboard         Up 5 minutes            0.0.0.0:3000->80/tcp
+SERVICE / CONTAINER          STATUS         PORTS
+shieldapi-redis              Up (healthy)   0.0.0.0:6379->6379/tcp
+shieldapi-gateway            Up 5 minutes   0.0.0.0:8000->8000/tcp
+shieldapi-anomaly-engine     Up 5 minutes   surveillance daemon active
+shieldapi-backend-service    Up 5 minutes   0.0.0.0:8001->8001/tcp
+shieldapi-dashboard          Up 5 minutes   0.0.0.0:3000->80/tcp
 ```
 Once verified, open `http://localhost:3000` in your web browser.
 
