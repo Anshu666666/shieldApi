@@ -9,12 +9,12 @@
 
 **Course / Project Submission: User Manual**
 
-| Team Member Name | Roll Number | Academic Program |
-| :--- | :--- | :--- |
-| **Aman Madheshiya** | **2024BCD0032** | Computer Science & Engineering / Data Science |
-| **Anshuman Biswas** | **2024BCD0008** | Computer Science & Engineering / Data Science |
-| **Syed Zaid Gafer** | **2024BCD0028** | Computer Science & Engineering / Data Science |
-| **Nipun Abhilash** | **2024BCD0024** | Computer Science & Engineering / Data Science |
+| Team Member Name | Roll Number |
+| :--- | :--- |
+| **Aman Madheshiya** | **2024BCD0032** |
+| **Anshuman Biswas** | **2024BCD0008** |
+| **Syed Zaid Gafer** | **2024BCD0028** |
+| **Nipun Abhilash** | **2024BCD0024** |
 
 <br/>
 
