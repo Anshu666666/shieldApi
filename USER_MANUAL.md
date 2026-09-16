@@ -25,48 +25,48 @@
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
-   - 1.1 [Product Overview](#11-product-overview)
-   - 1.2 [Purpose and Problem Statement](#12-purpose-and-problem-statement)
-   - 1.3 [Intended Audience & Personas](#13-intended-audience--personas)
-2. [System Requirements](#2-system-requirements)
-   - 2.1 [Hardware Specifications](#21-hardware-specifications)
-   - 2.2 [Software Prerequisites](#22-software-prerequisites)
-   - 2.3 [Network & Firewall Requirements](#23-network--firewall-requirements)
-   - 2.4 [Supported Client Browsers & Platforms](#24-supported-client-browsers--platforms)
-3. [Installation & Setup Guide](#3-installation--setup-guide)
-   - 3.1 [Cloud Access (Instant Zero-Installation)](#31-cloud-access-instant-zero-installation)
-   - 3.2 [Local Installation via Docker Compose](#32-local-installation-via-docker-compose)
-   - 3.3 [Verifying Container Health](#33-verifying-container-health)
-4. [User Access & Authentication (Setup / Credentials)](#4-user-access--authentication-setup--credentials)
-   - 4.1 [Admin Command Center Access](#41-admin-command-center-access)
-   - 4.2 [Client API Key Generation & Management](#42-client-api-key-generation--management)
-   - 4.3 [Dual-Tier Authentication Logic](#43-dual-tier-authentication-logic)
-5. [System Features & Operational Walkthrough](#5-system-features--operational-walkthrough)
-   - 5.1 [Command Center & Real-Time Telemetry](#51-command-center--real-time-telemetry)
-   - 5.2 [Distributed Token Bucket Rate Limiting](#52-distributed-token-bucket-rate-limiting)
-   - 5.3 [Anomaly Guardian & Threat Mitigation Engine](#53-anomaly-guardian--threat-mitigation-engine)
-   - 5.4 [API Key Vault & Quota Allocation](#54-api-key-vault--quota-allocation)
-   - 5.5 [Traffic Access Logs & Real-Time Audit Trail](#55-traffic-access-logs--real-time-audit-trail)
-   - 5.6 [Target Microservice Protection (`/proxy/*`)](#56-target-microservice-protection-proxy)
-6. [Navigation & Interface Layout](#6-navigation--interface-layout)
-   - 6.1 [Global Navigation Sidebar](#61-global-navigation-sidebar)
-   - 6.2 [Status Bar & Cluster Connectivity](#62-status-bar--cluster-connectivity)
-   - 6.3 [Mobile & Responsive Layout](#63-mobile--responsive-layout)
-7. [Input & Expected Output Specifications](#7-input--expected-output-specifications)
-   - 7.1 [Summary Matrix of System Interactions](#71-summary-matrix-of-system-interactions)
-   - 7.2 [Detailed Request/Response Examples](#72-detailed-requestresponse-examples)
-8. [Error Handling & Alert Codes](#8-error-handling--alert-codes)
-   - 8.1 [HTTP 429 Too Many Requests](#81-http-429-too-many-requests)
-   - 8.2 [HTTP 403 Forbidden (Blacklisted IP)](#82-http-403-forbidden-blacklisted-ip)
-   - 8.3 [HTTP 401 Unauthorized (Invalid API Key)](#83-http-401-unauthorized-invalid-api-key)
-   - 8.4 [SSL Protocol Handshake Errors](#84-ssl-protocol-handshake-errors)
-   - 8.5 [HTTP 502 Bad Gateway](#85-http-502-bad-gateway)
-9. [Safe Exit & System Teardown](#9-safe-exit--system-teardown)
-   - 9.1 [Closing the Web Interface](#91-closing-the-web-interface)
-   - 9.2 [Graceful Docker Teardown](#92-graceful-docker-teardown)
-   - 9.3 [Data Persistence Retention](#93-data-persistence-retention)
-10. [Troubleshooting & Frequently Asked Questions (FAQ)](#10-troubleshooting--frequently-asked-questions-faq)
+- [**1. Introduction**](#1-introduction)
+    - [1.1 Product Overview](#11-product-overview)
+    - [1.2 Purpose and Problem Statement](#12-purpose-and-problem-statement)
+    - [1.3 Intended Audience & Personas](#13-intended-audience--personas)
+- [**2. System Requirements**](#2-system-requirements)
+    - [2.1 Hardware Specifications](#21-hardware-specifications)
+    - [2.2 Software Prerequisites](#22-software-prerequisites)
+    - [2.3 Network & Firewall Requirements](#23-network--firewall-requirements)
+    - [2.4 Supported Client Browsers & Platforms](#24-supported-client-browsers--platforms)
+- [**3. Installation & Setup Guide**](#3-installation--setup-guide)
+    - [3.1 Cloud Access (Instant Zero-Installation)](#31-cloud-access-instant-zero-installation)
+    - [3.2 Local Installation via Docker Compose](#32-local-installation-via-docker-compose)
+    - [3.3 Verifying Container Health](#33-verifying-container-health)
+- [**4. User Access & Authentication (Setup / Credentials)**](#4-user-access--authentication-setup--credentials)
+    - [4.1 Admin Command Center Access](#41-admin-command-center-access)
+    - [4.2 Client API Key Generation & Management](#42-client-api-key-generation--management)
+    - [4.3 Dual-Tier Authentication Logic](#43-dual-tier-authentication-logic)
+- [**5. System Features & Operational Walkthrough**](#5-system-features--operational-walkthrough)
+    - [5.1 Command Center & Real-Time Telemetry](#51-command-center--real-time-telemetry)
+    - [5.2 Distributed Token Bucket Rate Limiting](#52-distributed-token-bucket-rate-limiting)
+    - [5.3 Anomaly Guardian & Threat Mitigation Engine](#53-anomaly-guardian--threat-mitigation-engine)
+    - [5.4 API Key Vault & Quota Allocation](#54-api-key-vault--quota-allocation)
+    - [5.5 Traffic Access Logs & Real-Time Audit Trail](#55-traffic-access-logs--real-time-audit-trail)
+    - [5.6 Target Microservice Protection (`/proxy/*`)](#56-target-microservice-protection-proxy)
+- [**6. Navigation & Interface Layout**](#6-navigation--interface-layout)
+    - [6.1 Global Navigation Sidebar](#61-global-navigation-sidebar)
+    - [6.2 Status Bar & Cluster Connectivity](#62-status-bar--cluster-connectivity)
+    - [6.3 Mobile & Responsive Layout](#63-mobile--responsive-layout)
+- [**7. Input & Expected Output Specifications**](#7-input--expected-output-specifications)
+    - [7.1 Summary Matrix of System Interactions](#71-summary-matrix-of-system-interactions)
+    - [7.2 Detailed Request/Response Examples](#72-detailed-requestresponse-examples)
+- [**8. Error Handling & Alert Codes**](#8-error-handling--alert-codes)
+    - [8.1 HTTP 429 Too Many Requests](#81-http-429-too-many-requests)
+    - [8.2 HTTP 403 Forbidden (Blacklisted IP)](#82-http-403-forbidden-blacklisted-ip)
+    - [8.3 HTTP 401 Unauthorized (Invalid API Key)](#83-http-401-unauthorized-invalid-api-key)
+    - [8.4 SSL Protocol Handshake Errors](#84-ssl-protocol-handshake-errors)
+    - [8.5 HTTP 502 Bad Gateway](#85-http-502-bad-gateway)
+- [**9. Safe Exit & System Teardown**](#9-safe-exit--system-teardown)
+    - [9.1 Closing the Web Interface](#91-closing-the-web-interface)
+    - [9.2 Graceful Docker Teardown](#92-graceful-docker-teardown)
+    - [9.3 Data Persistence Retention](#93-data-persistence-retention)
+- [**10. Troubleshooting & Frequently Asked Questions (FAQ)**](#10-troubleshooting--frequently-asked-questions-faq)
 
 ---
 
@@ -309,8 +309,28 @@ Rate limiting in ShieldAPI is powered by an atomic Lua script (`packages/shared/
 
 #### How the Rate Limiter Operates:
 1. **Atomic Refill Algorithm**:
-   $$\text{Tokens Available} = \min\left(\text{Capacity}, \text{Previous Tokens} + (\Delta t \times \text{Refill Rate})\right)$$
-   Where $\Delta t$ is the precise fractional time elapsed since the last request.
+   <div class="formula-box">
+     <div class="formula-header">ATOMIC TOKEN REFILL ALGORITHM</div>
+     <div class="formula-math">
+       <span class="formula-var">Tokens Available</span>
+       <span class="formula-op">=</span>
+       <span class="formula-fn">min</span>
+       <span class="formula-bracket">[</span>
+       <span class="formula-term">Capacity</span>
+       <span class="formula-op">,</span>
+       <span class="formula-term">Previous Tokens</span>
+       <span class="formula-op">+</span>
+       <span class="formula-group">(</span>
+       <span class="formula-sym">&Delta;t</span>
+       <span class="formula-op">&times;</span>
+       <span class="formula-term">Refill Rate</span>
+       <span class="formula-group">)</span>
+       <span class="formula-bracket">]</span>
+     </div>
+     <div class="formula-legend">
+       Where <strong>&Delta;t</strong> is the precise fractional time elapsed (in seconds) since the client's previous request.
+     </div>
+   </div>
 2. **Zero Race Conditions**: Because Lua scripts execute atomically in Redis single-threaded event loop, simultaneous requests from distributed clients can never oversell tokens.
 3. **Automatic Garbage Collection**: Inactive client bucket keys in Redis automatically expire after 3600 seconds, guaranteeing zero memory leaks.
 
@@ -346,7 +366,7 @@ The background engine (`apps/anomaly-engine`) watches `/var/log/shieldapi/access
 
 ### 5.4 API Key Vault & Quota Allocation
 Located under the **API Keys** tab, this module acts as a secure cryptographic vault:
-* **Status Toggles**: Instantly pause (`Active` $\leftrightarrow$ `Suspended`) any API key without permanently deleting records.
+* **Status Toggles**: Instantly pause (`Active` ↔ `Suspended`) any API key without permanently deleting records.
 * **Key Rotation**: Generates a new cryptographically secure token while maintaining historical analytics.
 * **Revocation**: Deletes the key from Redis in `< 1 ms`, instantly terminating active client sessions.
 
@@ -427,12 +447,12 @@ When opened on mobile browsers (Android Chrome, iOS Safari), the sidebar collaps
 
 | Scenario | User / Client Input | Processing Component | Expected HTTP Status | Expected Output / UI Response |
 | :--- | :--- | :--- | :--- | :--- |
-| **Normal Request** | `GET /proxy/data` (Clean IP, Tokens $> 0$) | Gateway $\rightarrow$ Redis $\rightarrow$ Backend | `200 OK` | Backend JSON response; token counter decrements by 1. |
+| **Normal Request** | `GET /proxy/data` (Clean IP, Tokens > 0) | Gateway → Redis → Backend | `200 OK` | Backend JSON response; token counter decrements by 1. |
 | **Rate Limit Exceeded** | 15 rapid requests within 2 seconds | Redis Lua Token Bucket | `429 Too Many Requests` | `{"detail": "Rate limit exceeded. Try again in 2 seconds."}` with `Retry-After: 2` header. |
 | **Attack Burst** | >50 404 requests in 10 seconds | Anomaly Guardian Engine | `403 Forbidden` | IP auto-added to Redis Blacklist; subsequent requests instantly rejected. |
 | **Banned IP Call** | Any request from a blacklisted IP | Gateway Edge Filter | `403 Forbidden` | `{"detail": "Access denied: Your IP address is temporarily quarantined."}` |
 | **Invalid API Key** | `GET /proxy/data` with header `X-API-Key: bad_key` | Gateway Auth Middleware | `401 Unauthorized` | `{"detail": "Invalid or expired API Key."}` |
-| **Manual Ban Trigger** | Admin clicks `Manual IP Ban` in UI | Dashboard $\rightarrow$ Redis Manager | UI Success Toast | IP added to active blacklist table with 24-hour expiration countdown. |
+| **Manual Ban Trigger** | Admin clicks `Manual IP Ban` in UI | Dashboard → Redis Manager | UI Success Toast | IP added to active blacklist table with 24-hour expiration countdown. |
 
 ---
 
