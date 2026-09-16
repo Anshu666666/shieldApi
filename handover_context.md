@@ -141,7 +141,8 @@ python test_redis_manager.py
 ---
 
 ### Step 5: Open & Verify the Web Dashboard
-Open your browser and navigate to:
+* **Live Cloud URL**: [ShieldAPI | Gateway & Anomaly Command Center](https://shield-gateway.duckdns.org:3000/)
+* **Local Development URL**:
 ```
 http://localhost:3000
 ```

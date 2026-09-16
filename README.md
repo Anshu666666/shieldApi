@@ -16,7 +16,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Cloud](https://img.shields.io/badge/Deployed-Oracle_Cloud_Always_Free-F80000?style=for-the-badge&logo=oracle&logoColor=white)](https://www.oracle.com/cloud/free/)
 
-[**Live Demo (DuckDNS)**](https://shield-gateway.duckdns.org:3000/) • [**Swagger API Docs**](http://shield-gateway.duckdns.org:8000/docs) • [**Architecture Specs**](./architecture_diagrams.md)
+[**ShieldAPI | Gateway & Anomaly Command Center**](https://shield-gateway.duckdns.org:3000/) • [**Swagger API Docs**](http://shield-gateway.duckdns.org:8000/docs) • [**Architecture Specs**](./architecture_diagrams.md)
 
 </div>
 
@@ -226,6 +226,8 @@ ShieldAPI is architected to run seamlessly on an **Oracle Cloud Infrastructure (
    cd shieldApi
    docker compose up -d --build
    ```
+6. **Access Command Center**:
+   Open **[ShieldAPI | Gateway & Anomaly Command Center](https://shield-gateway.duckdns.org:3000/)** in your browser.
 
 ---
 

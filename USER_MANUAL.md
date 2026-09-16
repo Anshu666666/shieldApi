@@ -15,7 +15,7 @@
 
 **Date of Submission:** September 2026  
 **Document Version:** 1.0.0 (Release)  
-**Live Application URL:** [https://shield-gateway.duckdns.org:3000](https://shield-gateway.duckdns.org:3000)  
+**Live Application URL:** [ShieldAPI | Gateway & Anomaly Command Center](https://shield-gateway.duckdns.org:3000/)  
 **FastAPI Gateway Swagger Documentation:** [http://shield-gateway.duckdns.org:8000/docs](http://shield-gateway.duckdns.org:8000/docs)  
 **GitHub Repository:** [https://github.com/Anshu666666/shieldApi](https://github.com/Anshu666666/shieldApi)
 
@@ -174,7 +174,7 @@ For end-users, team members, and evaluators who simply wish to use the system im
 1. Open any modern desktop or mobile browser.
 2. Navigate directly to the live hosted URL:
    ```
-   https://shield-gateway.duckdns.org:3000
+   https://shield-gateway.duckdns.org:3000/
    ```
 3. The browser will securely establish a verified TLS connection (green padlock 🔒) and launch the ShieldAPI Command Center.
 4. To test Swagger interactive documentation for the gateway proxy:
@@ -242,7 +242,7 @@ ShieldAPI implements a dual-layer access model tailored for administrative opera
 
 ### 4.1 Admin Command Center Access
 The administrative interface operates as a centralized Security Command Center. 
-* **Zero-Hassle Operator Access**: Administrators connecting to `https://shield-gateway.duckdns.org:3000` are greeted with an active session dashboard providing instant cluster controls without cumbersome initial database seeds.
+* **Zero-Hassle Operator Access**: Administrators connecting to [ShieldAPI | Gateway & Anomaly Command Center](https://shield-gateway.duckdns.org:3000/) are greeted with an active session dashboard providing instant cluster controls without cumbersome initial database seeds.
 * **Operator Interface Layout**: The operator view is partitioned into a left-hand navigation sidebar, top system status banner, and center telemetry viewport.
 
 <div align="center">
@@ -522,7 +522,7 @@ Content-Type: application/json
 * **Root Cause**: The user navigated to plain HTTP using a browser that enforces HTTPS-First mode.
 * **Resolution**: Always open the secure URL configured with the official Let's Encrypt certificate:
   ```
-  https://shield-gateway.duckdns.org:3000
+  https://shield-gateway.duckdns.org:3000/
   ```
 
 ### 8.5 HTTP 502 Bad Gateway
