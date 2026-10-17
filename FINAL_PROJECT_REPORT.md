@@ -1,11 +1,16 @@
-# 🛡️ ShieldAPI — Final Project Report
-
-### Distributed Microservice Security Gateway, Atomic Token-Bucket Rate Limiter & Heuristic Anomaly Guardian
+<div style="text-align: center; margin-bottom: 12px;">
+  <div style="font-size: 11pt; font-weight: 700; color: #0284c7; letter-spacing: 0.6px; margin-bottom: 4px; text-transform: uppercase;">
+    CSE312 Software Architecture: Principles and Practices
+  </div>
+  <h1 style="font-size: 19pt; font-weight: 800; color: #0f172a; margin: 2px 0 6px 0; border: none; padding: 0;">
+    🛡️ ShieldAPI — Final Project Report
+  </h1>
+  <div style="font-size: 9.6pt; font-weight: 500; color: #475569; margin: 0 auto; max-width: 90%; line-height: 1.4;">
+    Distributed Microservice Security Gateway, Atomic Token-Bucket Rate Limiter & Heuristic Anomaly Guardian
+  </div>
+</div>
 
 ---
-
-**Course:** Software Architecture and Design & Distributed Systems | **Institution:** Indian Institute of Information Technology Kottayam (IIIT Kottayam)  
-**Submission Portal:** Moodle Assignment Submission (**Strict Page Limit: Max 10 Pages**) | **Date:** October 2026 | **Version:** 1.0.0 (Final Release)  
 
 | Team Member Name | Roll Number | Academic Specialization | Assigned Module Responsibility |
 | :--- | :--- | :--- | :--- |
@@ -20,23 +25,30 @@
 
 ---
 
-### Executive Summary & Report Structure
+### Executive Summary
 
 **ShieldAPI** is an enterprise-grade, cloud-native API Security Gateway and distributed threat mitigation suite. Operating as a high-performance reverse proxy in front of internal backend microservices, ShieldAPI inspects incoming HTTP traffic, enforces atomic distributed token-bucket rate limits per client IP or API key, continuously analyzes access logs via an asynchronous anomaly engine, and automatically blacklists malicious actors in Redis with automatic time-to-live (TTL) expiration.
 
-```
-Report Structure (Conforming strictly to IIIT Kottayam Moodle Syllabus):
-  1. Introduction .............................................................. Page 1
-  2. Problem Statement & 3. Feasibility Study (Technical, Operational, Economic) Page 2
-  4. Requirements Specification (Functional REQ-1..8 & Non-Functional NFR-1..5) . Page 3
-  5. Diagrams: Part 1 — Structural & Interaction (Use Case & Class Diagrams) .... Page 4
-  5. Diagrams: Part 2 — Behavioral & Workflow (Sequence & Activity Diagrams) .... Page 5
-  5. Diagrams: Part 3 (Statechart) & 6. Implementation Details (Backend & DB) ... Page 6
-  6. Implementation Details: Part 2 (Frontend Architecture & Cloud Hosting) ..... Page 7
-  7. User Documentation: Features (User Manual) — Dashboard & Rate Limiting ..... Page 8
-  7. User Documentation: Features (User Manual) — Anomaly Center, Vault & Logs .. Page 9
-  8. Testing Report (Unit, E2E Integration, Benchmarks) & 9. Conclusion ........ Page 10
-```
+<div class="toc-box">
+  <div class="toc-title">Table of Contents (Clickable Syllabus Index)</div>
+  <div class="toc-grid">
+    <div class="toc-col">
+      <div class="toc-row"><a href="#1-introduction">1. Introduction</a><span class="toc-page">Page 1</span></div>
+      <div class="toc-row"><a href="#2-problem-statement">2. Problem Statement</a><span class="toc-page">Page 2</span></div>
+      <div class="toc-row"><a href="#3-feasibility-study">3. Feasibility Study (Tech, Ops, Econ)</a><span class="toc-page">Page 2</span></div>
+      <div class="toc-row"><a href="#4-requirements-specification">4. Requirements (REQ-1..8 & NFR-1..5)</a><span class="toc-page">Page 3</span></div>
+      <div class="toc-row"><a href="#5-architectural-behavioral-diagrams">5. Diagrams: Use Case & Class</a><span class="toc-page">Page 4</span></div>
+    </div>
+    <div class="toc-col">
+      <div class="toc-row"><a href="#53-sequence-diagram-end-to-end-request-lifecycle">5. Diagrams: Sequence & Activity</a><span class="toc-page">Page 5</span></div>
+      <div class="toc-row"><a href="#55-statechart-diagram-client-lifecycle-transitions">5. Diagrams: Statechart & 6. Backend/DB</a><span class="toc-page">Page 6</span></div>
+      <div class="toc-row"><a href="#63-frontend-implementation-react-18-vite">6. Implementation: Frontend & Hosting</a><span class="toc-page">Page 7</span></div>
+      <div class="toc-row"><a href="#7-user-documentation-features-user-manual-part-1">7. Features: Command Center & Limits</a><span class="toc-page">Page 8</span></div>
+      <div class="toc-row"><a href="#73-anomaly-guardian-threat-mitigation-center">7. Features: Anomaly, Vault & Logs</a><span class="toc-page">Page 9</span></div>
+      <div class="toc-row"><a href="#8-testing-report">8. Testing Report & 9. Conclusion</a><span class="toc-page">Page 10</span></div>
+    </div>
+  </div>
+</div>
 
 ---
 
@@ -50,7 +62,7 @@ Modern cloud applications decompose monolithic architectures into distributed, f
 ShieldAPI synthesizes three foundational software architecture patterns:
 1. **Micro-Kernel (Plugin) Pattern:** The gateway core is a lightweight ASGI reverse proxy. Security policies (Blacklist Validator, Key Authenticator, Token Bucket Rate Limiter, and Traffic Log Emitter) attach as modular interceptors.
 2. **Broker Pattern:** An in-memory Redis broker decouples state management from compute nodes, providing sub-millisecond atomic token bucket tracking and cross-instance ban synchronization.
-3. **Pipes and Filters Pattern:** The background Anomaly Guardian processes log events through a unidirectional streaming pipeline: `Raw Log Tailer` $\rightarrow$ `Log Parser` $\rightarrow$ `Heuristic Sliding Window Matrix` $\rightarrow$ `Redis Auto-Blocker & Alert Dispatcher`.
+3. **Pipes and Filters Pattern:** The background Anomaly Guardian processes log events through a unidirectional streaming pipeline: Raw Log Tailer → Log Parser → Heuristic Sliding Window Matrix → Redis Auto-Blocker & Alert Dispatcher.
 
 <div class="page-break"></div>
 
@@ -62,7 +74,7 @@ Exposing raw microservices without an intermediary gateway exposes critical syst
 3. **Distributed State Synchronization Race Conditions:** Naive in-memory rate limiters running on local application threads fail when scaled horizontally across multiple instances, creating race conditions where clients bypass limits by hitting alternating gateway nodes.
 4. **Lack of Operational Visibility:** Infrastructure engineers often operate blind, lacking real-time telemetry on request throughput, token drain rates, geographic IPs, and live security threats.
 
-**ShieldAPI Objective:** Build and deploy a zero-trust, cloud-native API Gateway that enforces atomic distributed rate limits with $<1\text{ ms}$ query latency, autonomously detects and blacklists hostile scanners without human intervention, and presents live cluster telemetry via an interactive command center.
+**ShieldAPI Objective:** Build and deploy a zero-trust, cloud-native API Gateway that enforces atomic distributed rate limits with < 1 ms query latency, autonomously detects and blacklists hostile scanners without human intervention, and presents live cluster telemetry via an interactive command center.
 
 ---
 
@@ -72,14 +84,14 @@ An exhaustive three-dimensional feasibility analysis was conducted to validate t
 
 | Dimension | Technical Parameters & Empirical Evidence | Feasibility Outcome |
 | :--- | :--- | :--- |
-| **Technical Feasibility** | Asynchronous non-blocking Python ASGI (FastAPI), atomic Redis Lua routines (`EVALSHA`), OS filesystem event streaming via Watchdog, and isolated Docker containerization. Latency overhead benchmarked at $<0.8\text{ ms}$. | **Highly Feasible** (100% test pass rate, $<0.8\text{ ms}$ latency) |
+| **Technical Feasibility** | Asynchronous non-blocking Python ASGI (FastAPI), atomic Redis Lua routines (`EVALSHA`), OS filesystem event streaming via Watchdog, and isolated Docker containerization. Latency overhead benchmarked at < 0.8 ms. | **Highly Feasible** (100% test pass rate, < 0.8 ms latency) |
 | **Operational Feasibility** | Single-command Docker Compose orchestration (`docker-compose up -d`), cyber-themed React Command Center, zero-maintenance TTL auto-expiring bans, and visual attack testing tools. | **Highly Feasible** (Zero friction, self-healing architecture) |
-| **Economic Feasibility** | 100% open-source software stack (FastAPI, Redis 7, React 18, Docker, Caddy, Python). Deployed on Oracle Cloud Infrastructure (OCI) Always Free VM with DuckDNS dynamic TLS. Total Capex & Opex is **$0.00**. | **Highly Feasible** (Zero cost, indefinitely sustainable) |
+| **Economic Feasibility** | 100% open-source software stack (FastAPI, Redis 7, React 18, Docker, Caddy, Python). Deployed on Oracle Cloud Infrastructure (OCI) Always Free VM with DuckDNS dynamic TLS. Total Capex & Opex is $0.00. | **Highly Feasible** (Zero cost, indefinitely sustainable) |
 
 ### 3.1 Technical Feasibility
 * **Concurrency Model:** FastAPI leverages Python's `asyncio` event loop and `httpx.AsyncClient` connection pooling, allowing thousands of concurrent TCP connections per worker thread without blocking I/O.
 * **Atomic State Synchronization:** The token bucket algorithm is executed directly inside the Redis engine via a single atomic Lua script (`EVALSHA`). Because Redis is single-threaded, calculations of elapsed time, token replenishment, and token decrement occur atomically, eliminating all distributed race conditions.
-* **Low Computational Overhead:** Benchmark tests prove that the entire gateway interception pipeline introduces $<0.8\text{ ms}$ of latency overhead under standard load, comfortably meeting the $<50\text{ ms}$ requirement.
+* **Low Computational Overhead:** Benchmark tests prove that the entire gateway interception pipeline introduces < 0.8 ms of latency overhead under standard load, comfortably meeting the < 50 ms requirement.
 
 ### 3.2 Operational Feasibility
 * **Deployment Simplicity:** The entire multi-container topology (Gateway, Redis, Anomaly Guardian, Target Microservice, and React Dashboard) is containerized via Docker and orchestrated with a single `docker-compose up -d` command.
@@ -88,7 +100,7 @@ An exhaustive three-dimensional feasibility analysis was conducted to validate t
 
 ### 3.3 Economic Feasibility
 * **Zero Software Licensing Cost:** All technologies used—FastAPI, Redis 7, React, Vite, Tailwind CSS, Docker, Caddy, and Python—are released under permissive MIT and BSD open-source licenses.
-* **Zero Infrastructure Cost:** The production system is hosted on an Oracle Cloud Infrastructure (OCI) Always Free compute instance with DuckDNS dynamic routing and automated Let's Encrypt TLS certificates. Total infrastructure cost is **$0.00**.
+* **Zero Infrastructure Cost:** The production system is hosted on an Oracle Cloud Infrastructure (OCI) Always Free compute instance with DuckDNS dynamic routing and automated Let's Encrypt TLS certificates. Total infrastructure cost is $0.00.
 
 <div class="page-break"></div>
 
@@ -110,7 +122,7 @@ The system requirements for ShieldAPI were formally defined in the Software Requ
 | **REQ-8** | Ban Lifecycles & TTL | Blacklisted IPs remain blocked with HTTP 403 until TTL (24h) expires or an admin manually unbans via dashboard. |
 
 ### 4.2 Non-Functional Requirements
-* **NFR-1 (Performance & Latency):** Gateway processing overhead shall not exceed $15\text{ ms}$ under normal load conditions. Redis queries must execute in $<2\text{ ms}$.
+* **NFR-1 (Performance & Latency):** Gateway processing overhead shall not exceed 15 ms under normal load conditions. Redis queries must execute in < 2 ms.
 * **NFR-2 (Reliability & Fail-Open):** In the event of an unexpected Redis cluster outage, the gateway core shall log the incident heavily and transition into a graceful "fail-open" mode to prevent halting legitimate business traffic.
 * **NFR-3 (Information Shielding & Security):** Gateway responses must strip internal server signatures (`server`, `x-powered-by`) to prevent malicious infrastructure reconnaissance.
 * **NFR-4 (Horizontal Scalability):** The stateless design of the FastAPI gateway containers must allow linear horizontal scaling behind a Layer-4 load balancer without data discrepancies.
@@ -164,7 +176,7 @@ The Activity Diagram models the step-by-step decision matrix executed by the gat
 
 <img src="assets/uml/activity_diagram.png" alt="Activity Diagram" style="max-height: 165px; margin: 3px auto; display: block;" />
 
-* **Fail-Fast Workflow:** By validating the IP blacklist first (in $<0.2\text{ ms}$ via a Redis `SISMEMBER` check), blocked attackers are dropped before triggering any key parsing or rate-limit computations.
+* **Fail-Fast Workflow:** By validating the IP blacklist first (in < 0.2 ms via a Redis `SISMEMBER` check), blocked attackers are dropped before triggering any key parsing or rate-limit computations.
 * **Token Replenishment Branch:** If tokens are available, the counter decrements by 1 and the request dispatches to the backend. If 0 tokens remain, the gateway computes the retry delay and injects `Retry-After` headers.
 
 <div class="page-break"></div>
@@ -215,7 +227,7 @@ The data layer utilizes an in-memory Redis 7 broker. State management avoids dat
       return 0
   end
   ```
-* **API Key Hash Store:** API credentials and per-key rate limits are stored in a Redis hash `api_keys:{key_id}`, enabling instantaneous $O(1)$ lookups.
+* **API Key Hash Store:** API credentials and per-key rate limits are stored in a Redis hash `api_keys:{key_id}`, enabling instantaneous O(1) lookups.
 * **Quarantine Key Space:** Blocked IPs are stored as `blocked_ips:{ip}` with a 24-hour expiration (`EXPIRE 86400`).
 
 <div class="page-break"></div>
@@ -272,7 +284,7 @@ The primary dashboard provides a live operational overview of the gateway cluste
 
 * **Cluster Status & Uptime:** Displays active container health, Redis connectivity, and total uptime.
 * **Real-Time Throughput (RPM):** Monitors live request volume (e.g., 2,503 RPM with a 99.4% success rate).
-* **Average Latency Gauge:** Real-time round-trip latency tracking across all endpoints ($22.4\text{ ms}$ average).
+* **Average Latency Gauge:** Real-time round-trip latency tracking across all endpoints (22.4 ms average).
 * **Active Threat Counter:** Visual banner tracking the total number of malicious IPs currently quarantined in Redis.
 
 ---
@@ -307,7 +319,7 @@ The API Key Vault and Traffic Logs modules handle authentication governance and 
 <img src="assets/api_keys_vault.png" alt="API Keys Vault" style="max-height: 150px; margin: 3px auto; display: block;" />
 
 * **Key Provisioning:** Enables administrators to generate secure cryptographic API keys with customized ownership metadata and rate limit quotas.
-* **Usage Telemetry:** Tracks aggregate requests processed per API key (e.g., Key `demo_user_1` processed 268,190 requests with $<0.6\text{ ms}$ lookup latency).
+* **Usage Telemetry:** Tracks aggregate requests processed per API key (e.g., Key `demo_user_1` processed 268,190 requests with < 0.6 ms lookup latency).
 * **Live Audit Stream:** (Shown below) Renders a real-time terminal feed of incoming HTTP requests, response status codes, and security triggers.
 
 <img src="assets/traffic_logs.png" alt="Traffic Logs" style="max-height: 150px; margin: 3px auto; display: block;" />
@@ -340,10 +352,10 @@ Testing is orchestrated via two comprehensive Python suites: `test_redis_manager
 | **`502 Bad Gateway`** | Downstream microservice offline | `{"detail": "Bad Gateway: Target unreachable"}` | Graceful failure reporting |
 
 ### 8.3 Performance & Benchmark Analysis
-* **Overhead Latency:** Gateway processing introduces only $0.78\text{ ms}$ of latency overhead under standard load.
-* **Redis Execution Speed:** Redis Lua token-bucket evaluations execute in an average of $0.42\text{ ms}$.
-* **Throughput Capacity:** A single gateway worker sustains $>3,800\text{ requests/sec}$ without dropping connections.
-* **Memory Footprint:** The complete 5-container Dockerized stack consumes $<380\text{ MB}$ of RAM on the Oracle Cloud VM.
+* **Overhead Latency:** Gateway processing introduces only 0.78 ms of latency overhead under standard load.
+* **Redis Execution Speed:** Redis Lua token-bucket evaluations execute in an average of 0.42 ms.
+* **Throughput Capacity:** A single gateway worker sustains > 3,800 requests/sec without dropping connections.
+* **Memory Footprint:** The complete 5-container Dockerized stack consumes < 380 MB of RAM on the Oracle Cloud VM.
 
 ---
 

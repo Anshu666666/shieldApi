@@ -18,6 +18,12 @@ md_content = re.sub(r'>\s*\[!NOTE\]\s*', '> **NOTE:** ', md_content)
 md_content = re.sub(r'>\s*\[!TIP\]\s*', '> **TIP:** ', md_content)
 md_content = re.sub(r'>\s*\[!WARNING\]\s*', '> **WARNING:** ', md_content)
 
+# Clean up any leftover LaTeX math syntax into natural typography
+md_content = md_content.replace(r'$\rightarrow$', '→')
+md_content = md_content.replace(r'\rightarrow', '→')
+md_content = re.sub(r'\$\\text\{([^}]+)\}\$', r'\1', md_content)
+md_content = re.sub(r'\$([^$]+)\$', lambda m: m.group(1).replace(r'\text', '').replace('{', '').replace('}', '').strip(), md_content)
+
 # Resolve and embed images as Base64 Data URIs preserving custom inline styles
 def embed_img_tag(match):
     src = match.group(1)
@@ -186,6 +192,59 @@ styled_html = f"""<!DOCTYPE html>
   }}
   img {{
     page-break-inside: avoid;
+  }}
+
+  /* Clickable Table of Contents Box */
+  .toc-box {{
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3.5px solid #0284c7;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }}
+  .toc-title {{
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 3px;
+  }}
+  .toc-grid {{
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }}
+  .toc-col {{
+    flex: 1;
+  }}
+  .toc-row {{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 2.2px 0;
+    font-size: 8pt;
+    border-bottom: 1px dotted #cbd5e1;
+  }}
+  .toc-row a {{
+    color: #0369a1;
+    text-decoration: none;
+    font-weight: 600;
+  }}
+  .toc-row a:hover {{
+    text-decoration: underline;
+    color: #0284c7;
+  }}
+  .toc-page {{
+    color: #64748b;
+    font-size: 7.6pt;
+    font-weight: 500;
+    margin-left: 6px;
+    white-space: nowrap;
   }}
 </style>
 </head>
